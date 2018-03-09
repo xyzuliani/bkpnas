@@ -68,8 +68,6 @@ AGORA=`date +%Y-%m-%d_%H_%M`;
 
 RNUMPID=`pgrep rclone | sed ':a;N;$!ba;s/\n/,/g'`
 
-printf $RNUMPID"\n";
-
 onepid=$(awk '/./{line=$0} END {print line;}' $LPATH"/cron-"$BKFOLDER$ENTRACE1);
 twopid=$(awk '/./{line=$0} END {print line;}' $LPATH"/cron-"$BKFOLDER$ENTRACE2);
 
@@ -87,44 +85,36 @@ then
     PID1="${onepid##*,}";
     PID2="${twopid##*,}";
 
-    #echo $PID1"|"$PID2;
-    #exit;
-
     if [ -n "$PID1" ] && [[ $RNUMPID == *"$PID1"* ]]; then
 
-	echo "true111";
-	exit;
-
-        echo "$BKFOLDER$TGT1,$AGORA,111" >> $LPATH"/test-cron-"$BKFOLDER$ENTRACE1;
+        echo "$BKFOLDER$TGT1,$AGORA,$PID1" >> $LPATH"/cron-"$BKFOLDER$ENTRACE1;
     else
 
-	echo "false222";
-	
-        #printf "\n\n### $AGORA ###\n\n" >> $LPATH"/test-"$BKFOLDER$ENTRACE1;
-	#echo "$BKFOLDER$TGT1,$AGORA,222" >> $LPATH"/test-cron-"$BKFOLDER$ENTRACE1;
+        printf "\n\n### $AGORA ###\n\n" >> $LPATH"/"$BKFOLDER$ENTRACE1;
+        setsid /root/rclone -v sync $source1 $GDRIVE":"$destiny1 --log-file $LPATH"/"$BKFOLDER$ENTRACE1 &
+        AID1=$!
+        echo "$BKFOLDER$TGT1,$AGORA,$AID1" >> $LPATH"/cron-"$BKFOLDER$ENTRACE1;
     fi
 
     if [ -n "$PID2" ] && [[ $RNUMPID == *"$PID2"* ]]; then
 
-	echo "true333";
-	exit;
-
-        echo "$BKFOLDER$TGT2,$AGORA,333" >> $LPATH"/test-cron-"$BKFOLDER$ENTRACE2;
+        echo "$BKFOLDER$TGT2,$AGORA,$PID2" >> $LPATH"/cron-"$BKFOLDER$ENTRACE2;
     else
 
-	echo "false444";
-
-        #printf "\n\n### $AGORA ###\n\n" >> $LPATH"/test-"$BKFOLDER$ENTRACE2;
-        #echo "$BKFOLDER$TGT2,$AGORA,444" >> $LPATH"/test-"$BKFOLDER$ENTRACE2;
+        printf "\n\n### $AGORA ###\n\n" >> $LPATH"/"$BKFOLDER$ENTRACE2;
+        setsid /root/rclone -v sync $source2 $GDRIVE":"$destiny2 --log-file $LPATH"/"$BKFOLDER$ENTRACE2 &
+        AID2=$!
+        echo "$BKFOLDER$TGT2,$AGORA,$AID2" >> $LPATH"/cron-"$BKFOLDER$ENTRACE2;
     fi
 else
 
-    echo "else555-666";
-    exit;
+    printf "\n\n### $AGORA ###\n\n" >> $LPATH"/"$BKFOLDER$ENTRACE1;
+    setsid /root/rclone -v sync $source1 $GDRIVE":"$destiny1 --log-file $LPATH"/"$BKFOLDER$ENTRACE1 &
+    IID1=$!
+    echo "$BKFOLDER$TGT1,$AGORA,$IID1" >> $LPATH"/cron-"$BKFOLDER$ENTRACE1;
 
-    printf "\n\n### $AGORA ###\n\n" >> $LPATH"/test-"$BKFOLDER$ENTRACE1;
-    echo "$BKFOLDER$TGT1,$AGORA,555" >> $LPATH"/test-cron-"$BKFOLDER$ENTRACE1;
-
-    printf "\n\n### $AGORA ###\n\n" >> $LPATH"/test-"$BKFOLDER$ENTRACE2;
-    echo "$BKFOLDER$TGT2,$AGORA,666" >> $LPATH"/test-cron-"$BKFOLDER$ENTRACE2;
+    printf "\n\n### $AGORA ###\n\n" >> $LPATH"/"$BKFOLDER$ENTRACE2;
+    setsid /root/rclone -v sync $source2 $GDRIVE":"$destiny2 --log-file $LPATH"/"$BKFOLDER$ENTRACE2 &
+    IID2=$!
+    echo "$BKFOLDER$TGT2,$AGORA,$IID2" >> $LPATH"/cron-"$BKFOLDER$ENTRACE2;
 fi
